@@ -29,12 +29,12 @@ with open(join(data_source, 'db.info')) as db_info:
 # params
 train_batch_size = 10
 test_batch_size = 20
-ntree = 6
+ntree = 10
 treeDepth = 8
 maxIter = 10000
 test_interval = 50
 test_iter = int(np.ceil(nTest / test_batch_size)) # 测试一个epoch需要的iter数
-leaf = 128
+leaf = 256
 lr = 0.1
 
 # train.prototxt
@@ -54,91 +54,118 @@ def make_net(phase='train'):
     # 第一列
     n.conv1_1 = L.Convolution(n.data, kernel_size=9, pad=4, num_output=16, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu1_1 = L.ReLU(n.conv1_1, in_place=True)
+    n.PReLU1_1 = L.PReLU(n.conv1_1, in_place=True)
 
     if phase == 'train':
-        n.bn1_1 = L.BatchNorm(n.relu1_1, use_global_stats=False, name='bn1_1')
+        n.bn1_1 = L.BatchNorm(n.PReLU1_1, use_global_stats=False, name='bn1_1')
     else:
-        n.bn1_1 = L.BatchNorm(n.relu1_1, use_global_stats=True, name='bn1_1')
+        n.bn1_1 = L.BatchNorm(n.PReLU1_1, use_global_stats=True, name='bn1_1')
     n.scale1_1 = L.Scale(n.bn1_1, bias_term=True, name='scale1_1')
 
-    #n.resh1_1 = L.Reshape(n.relu1_1, shape=dict(dim=[0, 0, 160, 140]))
+    #n.resh1_1 = L.Reshape(n.PReLU1_1, shape=dict(dim=[0, 0, 160, 140]))
     n.pool1_1 = L.Pooling(n.scale1_1, pool=P.Pooling.MAX, kernel_size=2, stride=2)
+    n.pool1_1_2 = L.Pooling(n.pool1_1, pool=P.Pooling.MAX, kernel_size=2, stride=2)
     n.conv1_2 = L.Convolution(n.pool1_1, kernel_size=7, pad=3, num_output=32, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu1_2 = L.ReLU(n.conv1_2, in_place=True)
-    n.pool1_2 = L.Pooling(n.relu1_2, pool=P.Pooling.MAX, kernel_size=2, stride=2)
+    n.PReLU1_2 = L.PReLU(n.conv1_2, in_place=True)
+
+    if phase == 'train':
+        n.bn1_2 = L.BatchNorm(n.PReLU1_2, use_global_stats=False, name='bn1_2')
+    else:
+        n.bn1_2 = L.BatchNorm(n.PReLU1_2, use_global_stats=True, name='bn1_2')
+    n.scale1_2 = L.Scale(n.bn1_2, bias_term=True, name='scale1_2')
+    n.pool1_2 = L.Pooling(n.scale1_2, pool=P.Pooling.MAX, kernel_size=2, stride=2)
     n.conv1_3 = L.Convolution(n.pool1_2, kernel_size=7, pad=3, num_output=16, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu1_3 = L.ReLU(n.conv1_3, in_place=True)
-    n.conv1_4 = L.Convolution(n.relu1_3, kernel_size=7, pad=3, num_output=8, weight_filler=dict(type='xavier'),
-                              param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu1_4 = L.ReLU(n.conv1_4, in_place=True)
+    n.PReLU1_3 = L.PReLU(n.conv1_3, in_place=True)
 
-    n.conv1_5 = L.Convolution(n.relu1_4, kernel_size=7, pad=3, num_output=8, weight_filler=dict(type='xavier'),
+    n.conv1_4 = L.Convolution(n.PReLU1_3, kernel_size=7, pad=3, num_output=8, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu1_5 = L.ReLU(n.conv1_5, in_place=True)
+    n.PReLU1_4 = L.PReLU(n.conv1_4, in_place=True)
+
+    n.conv1_5 = L.Convolution(n.PReLU1_4, kernel_size=7, pad=3, num_output=8, weight_filler=dict(type='xavier'),
+                              param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
+    n.PReLU1_5 = L.PReLU(n.conv1_5, in_place=True)
 
     # 第2列
     n.conv2_1 = L.Convolution(n.data, kernel_size=7, pad=3, num_output=24, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu2_1 = L.ReLU(n.conv2_1, in_place=True)
+    n.PReLU2_1 = L.PReLU(n.conv2_1, in_place=True)
 
     
     if phase == 'train':
-        n.bn2_1 = L.BatchNorm(n.relu2_1, use_global_stats=False, name='bn2_1')
+        n.bn2_1 = L.BatchNorm(n.PReLU2_1, use_global_stats=False, name='bn2_1')
     else:
-        n.bn2_1 = L.BatchNorm(n.relu2_1, use_global_stats=True, name='bn2_1')
+        n.bn2_1 = L.BatchNorm(n.PReLU2_1, use_global_stats=True, name='bn2_1')
     n.scale2_1 = L.Scale(n.bn2_1, bias_term=True, name='scale2_1')
 
     n.pool2_1 = L.Pooling(n.scale2_1, pool=P.Pooling.MAX, kernel_size=2, stride=2)
+    n.pool2_1_2 = L.Pooling(n.pool2_1, pool=P.Pooling.MAX, kernel_size=2, stride=2)
     n.conv2_2 = L.Convolution(n.pool2_1, kernel_size=5, pad=2, num_output=48, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu2_2 = L.ReLU(n.conv2_2, in_place=True)
-    n.pool2_2 = L.Pooling(n.relu2_2, pool=P.Pooling.MAX, kernel_size=2, stride=2)
+    n.PReLU2_2 = L.PReLU(n.conv2_2, in_place=True)
+
+    if phase == 'train':
+        n.bn2_2 = L.BatchNorm(n.PReLU2_2, use_global_stats=False, name='bn2_2')
+    else:
+        n.bn2_2 = L.BatchNorm(n.PReLU2_2, use_global_stats=True, name='bn2_2')
+    n.scale2_2 = L.Scale(n.bn2_2, bias_term=True, name='scale2_2')
+
+    n.pool2_2 = L.Pooling(n.scale2_2, pool=P.Pooling.MAX, kernel_size=2, stride=2)
     n.conv2_3 = L.Convolution(n.pool2_2, kernel_size=5, pad=2, num_output=24, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu2_3 = L.ReLU(n.conv2_3, in_place=True)
-    n.conv2_4 = L.Convolution(n.relu2_3, kernel_size=5, pad=2, num_output=12, weight_filler=dict(type='xavier'),
-                              param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu2_4 = L.ReLU(n.conv2_4, in_place=True)
+    n.PReLU2_3 = L.PReLU(n.conv2_3, in_place=True)
 
-    n.conv2_5 = L.Convolution(n.relu2_4, kernel_size=5, pad=2, num_output=12, weight_filler=dict(type='xavier'),
+    n.conv2_4 = L.Convolution(n.PReLU2_3, kernel_size=5, pad=2, num_output=12, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu2_5 = L.ReLU(n.conv2_5, in_place=True)
+    n.PReLU2_4 = L.PReLU(n.conv2_4, in_place=True)
+
+    n.conv2_5 = L.Convolution(n.PReLU2_4, kernel_size=5, pad=2, num_output=12, weight_filler=dict(type='xavier'),
+                              param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
+    n.PReLU2_5 = L.PReLU(n.conv2_5, in_place=True)
 
     # 第3列
     n.conv3_1 = L.Convolution(n.data, kernel_size=5, pad=2, num_output=32, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
 
-    n.relu3_1 = L.ReLU(n.conv3_1, in_place=True)
+    n.PReLU3_1 = L.PReLU(n.conv3_1, in_place=True)
 
 
     if phase == 'train':
-        n.bn3_1 = L.BatchNorm(n.relu3_1, use_global_stats=False, name='bn3_1')
+        n.bn3_1 = L.BatchNorm(n.PReLU3_1, use_global_stats=False, name='bn3_1')
     else:
-        n.bn3_1 = L.BatchNorm(n.relu3_1, use_global_stats=True, name='bn3_1')
+        n.bn3_1 = L.BatchNorm(n.PReLU3_1, use_global_stats=True, name='bn3_1')
     n.scale3_1 = L.Scale(n.bn3_1, bias_term=True, name='scale3_1')
 
     n.pool3_1 = L.Pooling(n.scale3_1, pool=P.Pooling.MAX, kernel_size=2, stride=2)
+    n.pool3_1_2 = L.Pooling(n.pool3_1, pool=P.Pooling.MAX, kernel_size=2, stride=2)
     n.conv3_2 = L.Convolution(n.pool3_1, kernel_size=3, pad=1, num_output=64, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu3_2 = L.ReLU(n.conv3_2, in_place=True)
-    n.pool3_2 = L.Pooling(n.relu3_2, pool=P.Pooling.MAX, kernel_size=2, stride=2)
+    n.PReLU3_2 = L.PReLU(n.conv3_2, in_place=True)
+
+    if phase == 'train':
+        n.bn3_2 = L.BatchNorm(n.PReLU3_2, use_global_stats=False, name='bn3_2')
+    else:
+        n.bn3_2 = L.BatchNorm(n.PReLU3_2, use_global_stats=True, name='bn3_2')
+    n.scale3_2 = L.Scale(n.bn3_2, bias_term=True, name='scale3_2')
+
+    n.pool3_2 = L.Pooling(n.scale3_2, pool=P.Pooling.MAX, kernel_size=2, stride=2)
     n.conv3_3 = L.Convolution(n.pool3_2, kernel_size=3, pad=1, num_output=32, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu3_3 = L.ReLU(n.conv3_3, in_place=True)
-    n.conv3_4 = L.Convolution(n.relu3_3, kernel_size=3, pad=1, num_output=16, weight_filler=dict(type='xavier'),
+    n.PReLU3_3 = L.PReLU(n.conv3_3, in_place=True)
+
+
+    n.conv3_4 = L.Convolution(n.PReLU3_3, kernel_size=3, pad=1, num_output=16, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu3_4 = L.ReLU(n.conv3_4, in_place=True)
+    n.PReLU3_4 = L.PReLU(n.conv3_4, in_place=True)
 
 
-    n.conv3_5 = L.Convolution(n.relu3_4, kernel_size=3, pad=1, num_output=16, weight_filler=dict(type='xavier'),
+    n.conv3_5 = L.Convolution(n.PReLU3_4, kernel_size=3, pad=1, num_output=16, weight_filler=dict(type='xavier'),
                               param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
-    n.relu3_5 = L.ReLU(n.conv3_5, in_place=True)
+    n.PReLU3_5 = L.PReLU(n.conv3_5, in_place=True)
 
-    n.concat1 = L.Concat(n.relu1_4, n.relu2_4, n.relu3_4,
-                         n.relu1_5, n.relu2_5, n.relu3_5, axis=1)
+    n.concat1 = L.Concat(n.pool1_1_2, n.pool2_1_2, n.pool3_1_2,
+                         n.PReLU1_5, n.PReLU2_5, n.PReLU3_5, axis=1)
     #n.concat1 = L.Concat(n.relu1_4, n.relu2_4, n.relu3_4, axis=1)
     n.conv4 = L.Convolution(n.concat1, kernel_size=1, pad=2, num_output=10, weight_filler=dict(type='xavier'),
                             param=[dict(lr_mult=0.01, decay_mult=1), dict(lr_mult=0.02, decay_mult=0)])
@@ -188,7 +215,7 @@ def make_net(phase='train'):
 def make_solver():
     s = caffe_pb2.SolverParameter()
     s.random_seed = 0xCAFFE
-    s.type = 'Adam'
+    s.type = 'SGD'
     s.display = 5
     #s.base_lr = 1e-1
     s.base_lr = 2e-2
@@ -198,7 +225,7 @@ def make_solver():
     s.stepsize = 10000
     s.max_iter = maxIter
     s.snapshot = 5000
-    snapshot_prefix = join(dirname(__file__), 'model_0')
+    snapshot_prefix = join(dirname(__file__), 'model_1')
     print snapshot_prefix
     #if not isdir(snapshot_prefix):
     #    os.makedirs(snapshot_prefix)
