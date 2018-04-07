@@ -129,11 +129,8 @@ if __name__ == '__main__':
     #make_lmdb(db_path, img_list[:NTrain], 'count')
     make_lmdb(db_path, train_list, 'count')
 
-    #Shuffle the test set
+    #get the test set without shuffling
     test_list = copy.deepcopy(img_list[0:600]+img_list[1400:2000])
-    #img_hash = {hashlib.md5(img).hexdigest(): img for img in test_list}
-    #img_hash = OrderedDict(sorted(img_hash.items()))
-    #test_list = img_hash.values()
 
     # converting testing data
     db_path = abspath(join(base_dir, 'Ratio' + str(args.ratio), 'test-img'))

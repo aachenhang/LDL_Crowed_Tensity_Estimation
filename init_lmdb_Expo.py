@@ -137,10 +137,8 @@ if __name__ == '__main__':
     make_lmdb(db_path, train_list, 'count')
 
 
-    #Shuffle the test set
-    img_hash = {hashlib.md5(img).hexdigest(): img for img in test_list}
-    img_hash = OrderedDict(sorted(img_hash.items()))
-    test_list = img_hash.values()
+    #get the test set without shuffling
+    test_list = sorted(test_list)
     
 
     # converting testing data
