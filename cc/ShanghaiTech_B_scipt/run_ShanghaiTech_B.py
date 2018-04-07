@@ -49,15 +49,12 @@ if __name__ == '__main__':
     iter = 0
     mae = []
     solver = caffe.SGDSolver(join(tmp_dir, 'solver.prototxt'))
-    # base_weights = join(dirname(__file__), 'bvlc_reference_caffenet.caffemodel')
-    # solver.net.copy_from(base_weights)
+
     print "*********************************************"
     print "Summarize of net parameters:"
     for p in solver.net.params:
         param = solver.net.params[p][0].data[...]
         print "  layer \"%s\":, parameter[0] mean=%f, std=%f" % (p, param.mean(), param.std())
-    #raw_input("Press Enter to continue...")
-    #solver.step(1)
     while iter < maxIter:  # 每次迭代
         solver.step(test_interval)  # 运行一个测试间隔
         solver.test_nets[0].share_with(solver.net)
@@ -66,9 +63,9 @@ if __name__ == '__main__':
         print mae
         print "*********************************************"
     #for layer_name, blob in solver.test_nets[0].blobs.iteritems():
-        print solver.test_nets[0].blobs['pred'].data.shape
+        #print solver.test_nets[0].blobs['pred'].data.shape
         for t in range(test_iter):  # 一个test_iter即为执行一个epoch的迭代次数
-            ae = 0
+            """
             for j in range(solver.test_nets[0].blobs['pred'].data.shape[0]):
                 a = solver.test_nets[0].blobs['pred'].data[j,:, 0, 0]
                 b = solver.test_nets[0].blobs['label'].data[j,:, 0, 0]
@@ -77,9 +74,8 @@ if __name__ == '__main__':
                 #raw_input('input the enter')
             print "pred"+str(j), np.where(a==max(a))[0][0]
             print "label"+str(j), np.where(b==max(b))[0][0]
-#             ae += abs()
-            ##mae1 += solver.test_nets[0].forward()['MAE']
-    #raw_input("Press Enter to continue...")
+            """
+            mae1 += solver.test_nets[0].forward()['MAE']
         mae1 /= test_iter
         mae.append(mae1)
         iter = iter + test_interval

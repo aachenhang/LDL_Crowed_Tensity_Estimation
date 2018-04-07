@@ -36,7 +36,6 @@ test_interval = 50
 test_iter = int(np.ceil(nTest / test_batch_size)) # 测试一个epoch需要的iter数
 leaf = 128
 lr = 0.1
-scale=11.560000
 
 # train.prototxt
 
@@ -204,7 +203,7 @@ def make_net(phase='train'):
                                         neural_decision_forest_param=dict(depth=treeDepth, num_trees=ntree,
                                                                           num_classes=maxCount - minCount + 1),
                                         name='probloss')
-        #n.MAE = L.MAE(n.pred, n.label)
+        n.MAE = L.MAE(n.pred, n.label)
     elif phase == 'deploy':
         n.pred = L.NeuralDecisionForest(n.fc8, neural_decision_forest_param=dict(depth=treeDepth, num_trees=ntree,
                                                                                  num_classes=maxCount - minCount + 1),

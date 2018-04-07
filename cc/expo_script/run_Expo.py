@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	#for layer_name, blob in solver.test_nets[0].blobs.iteritems():
         print solver.test_nets[0].blobs['pred'].data.shape
         for t in range(test_iter):  # 一个test_iter即为执行一个epoch的迭代次数
-            """
+            
             for j in range(solver.test_nets[0].blobs['pred'].data.shape[0]):
                 a = solver.test_nets[0].blobs['pred'].data[j,:, 0, 0]
                 b = solver.test_nets[0].blobs['label'].data[j,:, 0, 0]
@@ -79,7 +79,7 @@ if __name__ == '__main__':
                 raw_input('input the enter')
 	        print "pred"+str(j), np.where(a==max(a))[0][0]
 	        print "label"+str(j), np.where(b==max(b))[0][0]
-            """
+            
             mae1 += solver.test_nets[0].forward()['MAE']
 	#raw_input("Press Enter to continue...")
         mae1 /= test_iter
