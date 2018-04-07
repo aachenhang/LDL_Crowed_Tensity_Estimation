@@ -50,10 +50,8 @@ def is_image(im):
 test_list = [img for img in os.listdir('/home/aachenhang/dataset/frames_Expo/test/') if is_image(img)]
 assert (len(test_list) != 0)
 
-#Shuffle the test set
-img_hash = {hashlib.md5(img).hexdigest(): img for img in test_list}
-img_hash = OrderedDict(sorted(img_hash.items()))
-test_list = img_hash.values()
+#get the test set
+test_list = sorted(test_list)
 
 label = np.array([])
 for img in test_list:
