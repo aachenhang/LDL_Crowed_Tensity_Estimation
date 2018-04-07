@@ -39,9 +39,10 @@ mean_count = np.mean(np.array([int(re.sub("[^0-9]", "", img.split('n')[-1])) for
 scale = float(1.0*max_count / 100.0)
 
 if(scale > 1):
-    max_count = int(max_count / scale)
-    min_count = int(min_count / scale)
-    mean_count = int(mean_count / scale)
+    max_count = int(round(max_count / scale))
+    min_count = int(round(min_count / scale))
+    mean_count = int(round(mean_count / scale))
+
 
 # 初始标签的分布为高斯分布，通过命令行参数可改变
 gaussian = scipy.signal.gaussian(max_count - min_count + 1, args.std)

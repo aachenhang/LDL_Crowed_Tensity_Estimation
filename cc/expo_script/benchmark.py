@@ -64,7 +64,8 @@ for img in test_list:
 #get the prediction from the test network
 pred = np.array([])
 with open(join(os.path.dirname('__file__'),'..', 'data','ExpoDB', 'Ratio0.4','db.info')) as db_info:
-    l = db_info.readlines()[1].split(',')  
+    l = db_info.readlines()[1].split(',')    
+    minCount = int(re.sub("[^0-9]", "", l[2]))
     scale = float(re.sub("[^0-9\.]", "", l[-1]))
 
 
@@ -75,7 +76,7 @@ for i in range(Iter):
     """
     pred_in_one_batch = net.blobs['pred'].data
     for j in range(test_batch_size):
-        pred_one_simple = pred_in_one_batch[j,:,0,0].argsort()[-1]
+        pred_one_simple = pred_in_one_batch[j,:,0,0].argsort()[-1] + minCount
         pred_one_simple = round(pred_one_simple * scale)
         pred = np.append(pred, pred_one_simple)
 
